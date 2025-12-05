@@ -11,7 +11,7 @@ class Monster(pygame.sprite.Sprite):
         self.type = monster_type
         self.state = "RUN"
         self.distance_moved = 0
-        self.max_distance = 200 # Đi 200px thì dừng
+        self.max_distance = 700 # Đi 200px thì dừng
         
         # --- 1. CẤU HÌNH TÊN FILE ẢNH CHO TỪNG LOẠI ---
         # Bạn cần chuẩn bị sẵn file ảnh Idle tương ứng trong folder
@@ -25,7 +25,7 @@ class Monster(pygame.sprite.Sprite):
         elif monster_type == "Frogger":
             walk_img_name = "frogger_move.png"
             idle_img_name = "frogger_idle.png" # <--- Tên file ảnh đứng yên
-            self.frame_w, self.frame_h = 384, 128
+            self.frame_w, self.frame_h = 356, 128
             self.scale = 1
             self.speed = 4
 

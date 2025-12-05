@@ -11,13 +11,13 @@ class Player(pygame.sprite.Sprite):
         
         # kích thước khung hình ban đầu
         self.base_frame_width = 112
-        self.base_frame_height = 80
+        self.base_frame_height = 90
         
         # kích thước khung hình mới sau khi phóng to
         self.frame_width = self.base_frame_width * self.scale_factor
         self.frame_height = self.base_frame_height * self.scale_factor
         
-        self.num_frames = 8
+        self.num_frames = 4
         
         self.images = []
         self.index = 0

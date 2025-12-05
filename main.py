@@ -27,7 +27,7 @@ player = Player(100, ground_y)
 player.rect.bottom = ground_y
 
 ground_y = 500
-monster = MonsterSpawner(WIDTH, HEIGHT, ground_y)
+monster_spawner = MonsterSpawner(WIDTH, HEIGHT, ground_y)
 
 # --- VÒNG LẶP GAME ---
 while running:
@@ -40,13 +40,13 @@ while running:
     # 2. Cập nhật logic
     player.update()
     
-    # 3. Vẽ hình
-    background.draw(screen)    # Layer 0
-    game_map.draw(screen)       # Layer 1
+    background.draw(screen)      
     
-    monster.update(screen)
+    game_map.draw(screen)        
     
-    screen.blit(player.image, player.rect) 
+    monster_spawner.update(screen)  
+    
+    screen.blit(player.image, player.rect)
     
     pygame.display.update()
     clock.tick(60)
