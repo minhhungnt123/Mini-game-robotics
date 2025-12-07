@@ -15,6 +15,6 @@ git commit -m "Auto commit by %username% on %datetime%"
 git push
 
 echo ---------------------------------------------
-echo   ✔ Da push code len GitHub thanh cong!
+echo   Da push code len GitHub thanh cong!
 echo ---------------------------------------------
 pause
