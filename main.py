@@ -16,7 +16,7 @@ running = True
 # --- KHỞI TẠO ĐỐI TƯỢNG ---
 background = ParallaxBackground(WIDTH, HEIGHT)
 game_map = Map()
-player = Player(200, 500) 
+player = Player(200, 480) 
 
 monster_spawner = MonsterSpawner(WIDTH, HEIGHT, 550)
 
@@ -33,9 +33,9 @@ while running:
     if len(monster_spawner.monsters) > 0:
         target_monster = monster_spawner.monsters[0]
         # Tính khoảng cách
-        distance = target_monster.rect.left - player.rect.right
+        distance = target_monster.rect.centerx - player.rect.centerx
         
-        if 0 < distance < 400: 
+        if 0 < distance < 800: 
             game_is_moving = False
     
     # Update trạng thái Player
