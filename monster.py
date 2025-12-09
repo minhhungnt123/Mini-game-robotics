@@ -28,7 +28,7 @@ class Monster(pygame.sprite.Sprite):
             self.scale = 2
             self.speed = 4
             self.monster_data = {
-                "RUN":    {"img": "frogger_move.png", "w": 356, "h": 80}, 
+                "RUN":    {"img": "frogger_move.png", "w": 384, "h": 128}, 
                 "IDLE":   {"img": "frogger_idle.png", "w": 128, "h": 128},
                 "ATTACK": {"img": "frogger_spit.png", "w": 80, "h": 48},
                 "HURT":   {"img": "frogger_hurt.png", "w": 48, "h": 48}
@@ -138,10 +138,9 @@ class MonsterSpawner:
                         self.waiting_for_spawn = False
 
         for monster in self.monsters[:]: 
-            monster.update(is_moving) # Truyền trạng thái xuống
+            monster.update(is_moving)
             monster.draw(screen)
             
-            # Xóa nếu ra khỏi màn hình
             if monster.rect.right < 0: 
                 self.monsters.remove(monster)
 

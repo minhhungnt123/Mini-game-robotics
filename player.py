@@ -12,12 +12,10 @@ class Player(pygame.sprite.Sprite):
         self.state = "WALK" # Trạng thái hiện tại: IDLE, WALK, ATTACK, HIT, DEATH...
         
         # 1. CẤU HÌNH KÍCH THƯỚC CHO TỪNG HÀNH ĐỘNG
-        # Bạn hãy mở từng ảnh trong folder Images/Player để xem kích thước 1 frame là bao nhiêu nhé
-        # Ví dụ: Nếu ảnh Attack.png rộng 600px và có 6 hình -> w = 100
         self.player_data = {
-            "IDLE":   {"img": "Idle.png",   "w": 112, "h": 90}, # Kích thước gốc từ file cũ của bạn
-            "WALK":   {"img": "Walk.png",   "w": 112, "h": 90}, # <--- Hãy kiểm tra lại width/height
-            "ATTACK": {"img": "Attack.png", "w": 112, "h": 90}, # <--- Thường sẽ rộng hơn
+            "IDLE":   {"img": "Idle.png",   "w": 112, "h": 90}, 
+            "WALK":   {"img": "Walk.png",   "w": 112, "h": 90}, 
+            "ATTACK": {"img": "Attack.png", "w": 112, "h": 90}, 
             "HIT":    {"img": "Hit.png",    "w": 112, "h": 90},
             "DEATH":  {"img": "Death.png",  "w": 112, "h": 90},
             "PARRY":  {"img": "Parry.png",  "w": 112, "h": 90},
@@ -96,7 +94,11 @@ class Player(pygame.sprite.Sprite):
         self.frame_index += self.animation_speed
         if self.frame_index >= len(frame_list):
             self.frame_index = 0
+        old_bottom = self.rect.midbottom
+        
         self.image = frame_list[int(self.frame_index)]
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = old_bottom
 
     # --- HÀM HỖ TRỢ ĐỂ MAIN GỌI ---
     def set_action(self, new_action):
