@@ -1,0 +1,268 @@
+{
+  "easy": [
+    {
+      "question": "Robot là gì?",
+      "options": [
+        "Một món đồ ăn",
+        "Máy tự động làm việc",
+        "Một loại cây",
+        "Con vật nuôi"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Cảm biến dùng để làm gì?",
+      "options": [
+        "Ngủ",
+        "Chạy nhanh hơn",
+        "Nhận biết môi trường",
+        "Phát ra âm nhạc"
+      ],
+      "answer": 2
+    },
+    {
+      "question": "Bánh xe robot dùng để làm gì?",
+      "options": [
+        "Giúp robot bay",
+        "Giúp robot di chuyển",
+        "Phát sáng",
+        "Biến hình"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Đèn LED trên robot để làm gì?",
+      "options": [
+        "Trang trí",
+        "Báo hiệu trạng thái",
+        "Vẽ hình",
+        "Tạo tiếng động"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Pin của robot có tác dụng:",
+      "options": [
+        "Cung cấp năng lượng",
+        "Làm đẹp",
+        "Thu nhỏ robot",
+        "Tạo tiếng động"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Lập trình robot là gì?",
+      "options": [
+        "Viết hướng dẫn cho robot",
+        "Chơi game",
+        "Vẽ tranh",
+        "Chụp hình"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Cảm biến màu giúp robot:",
+      "options": ["Nhận biết màu sắc", "Nghe tiếng", "Tỏa nhiệt", "Bay lên"],
+      "answer": 0
+    },
+    {
+      "question": "Robot sẽ dừng lại khi:",
+      "options": ["Pin yếu", "Có cảm xúc", "Gặp vật cản", "Buồn ngủ"],
+      "answer": 2
+    },
+    {
+      "question": "Robot dò line đi theo:",
+      "options": ["Âm thanh", "Mùi hương", "Đường kẻ màu", "Gió"],
+      "answer": 2
+    },
+    {
+      "question": "Cảm biến siêu âm giống như:",
+      "options": [
+        "Tai của robot",
+        "Mũi của robot",
+        "Mắt của robot",
+        "Tóc robot"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Ưu điểm bánh xích:",
+      "options": ["Đi nhiều địa hình", "Bay", "Lặn", "Chạy đua F1"],
+      "answer": 0
+    },
+    {
+      "question": "Động cơ giúp robot:",
+      "options": ["Đổi màu", "Di chuyển", "Nói chuyện", "Ngủ"],
+      "answer": 1
+    },
+    {
+      "question": "Đo âm thanh bằng:",
+      "options": ["Siêu âm", "Cảm biến âm thanh", "Nhiệt độ", "Từ trường"],
+      "answer": 1
+    },
+    {
+      "question": "Robot rẽ trái nhờ:",
+      "options": ["Lập trình điều khiển", "Thời tiết", "Âm nhạc", "Độ cao"],
+      "answer": 0
+    },
+    {
+      "question": "Cảm biến ánh sáng đo:",
+      "options": ["Cường độ sáng", "Mùi vị", "Khoảng cách", "Thời gian"],
+      "answer": 0
+    }
+  ],
+  "medium": [
+    {
+      "question": "Servo motor có thể:",
+      "options": [
+        "Quay vô hạn",
+        "Quay góc chính xác",
+        "Không cần điện",
+        "Chạy bằng nước"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Nguyên lý cảm biến siêu âm:",
+      "options": ["Tia laser", "Sóng âm phản hồi", "Nhiệt độ", "Ánh sáng"],
+      "answer": 1
+    },
+    {
+      "question": "Arduino là gì?",
+      "options": [
+        "Phần mềm vẽ",
+        "Bo mạch lập trình",
+        "Máy tính bảng",
+        "Camera"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Lệnh if/else dùng để:",
+      "options": [
+        "Lặp mãi mãi",
+        "Kiểm tra điều kiện",
+        "Tăng tốc độ",
+        "Lưu file"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Encoder có tác dụng:",
+      "options": ["Đo tốc độ/vị trí", "Phát điện", "Phát nhạc", "Tạo màu"],
+      "answer": 0
+    },
+    {
+      "question": "Biến (Variable) dùng để:",
+      "options": ["Lưu giá trị", "Tăng tốc CPU", "Tạo tiếng ồn", "Xóa bộ nhớ"],
+      "answer": 0
+    },
+    {
+      "question": "PWM thường dùng để:",
+      "options": [
+        "Điều xung (tốc độ/độ sáng)",
+        "Phát nhạc",
+        "Gửi email",
+        "Đọc màu"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Robot dò line dùng cảm biến:",
+      "options": ["Ánh sáng", "Hồng ngoại (IR)", "Nhiệt độ", "Khí gas"],
+      "answer": 1
+    },
+    {
+      "question": "Bluetooth dùng để:",
+      "options": ["Giao tiếp không dây", "Sạc pin", "Đo nhiệt", "Tăng tốc"],
+      "answer": 0
+    },
+    {
+      "question": "Tránh vật cản dùng:",
+      "options": ["Đèn LED", "Siêu âm / Hồng ngoại", "Loa", "Quạt"],
+      "answer": 1
+    },
+    {
+      "question": "Cảm biến Gyro đo:",
+      "options": ["Ánh sáng", "Góc nghiêng / Gia tốc", "Nhiệt độ", "Màu sắc"],
+      "answer": 1
+    },
+    {
+      "question": "Robot tự cân bằng cần:",
+      "options": ["Gyro + PID", "Cảm biến khí", "Camera", "GPS"],
+      "answer": 0
+    },
+    {
+      "question": "Đặc điểm ESP32:",
+      "options": [
+        "Có WiFi + Bluetooth",
+        "Không cần code",
+        "Chạy pin con thỏ",
+        "Có màn hình"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "delay(1000) là bao lâu:",
+      "options": ["100 ms", "1 giây", "10 giây", "1 phút"],
+      "answer": 1
+    },
+    {
+      "question": "LED RGB là loại LED:",
+      "options": ["1 màu", "Đổi nhiều màu", "Phát âm thanh", "Đo nhiệt"],
+      "answer": 1
+    }
+  ],
+  "hard": [
+    {
+      "question": "PID là viết tắt của:",
+      "options": [
+        "Proportional Integral Derivative",
+        "Power In Device",
+        "Play In Day",
+        "Port Input Data"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Ngắt (Interrupt) dùng để:",
+      "options": [
+        "Ưu tiên xử lý sự kiện tức thời",
+        "Tắt nguồn robot",
+        "Tăng tốc độ",
+        "Xóa code"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Bộ lọc Kalman giúp:",
+      "options": [
+        "Khử nhiễu dữ liệu",
+        "Tăng tốc motor",
+        "Tiết kiệm pin",
+        "Phát nhạc hay hơn"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Tốc độ baud rate là gì?",
+      "options": [
+        "Tốc độ motor",
+        "Tốc độ đèn nháy",
+        "Tốc độ truyền dữ liệu",
+        "Dung lượng pin"
+      ],
+      "answer": 2
+    },
+    {
+      "question": "GPS xác định vị trí nhờ:",
+      "options": [
+        "Vệ tinh",
+        "Cột sóng WiFi",
+        "Từ trường trái đất",
+        "Ánh sáng mặt trời"
+      ],
+      "answer": 0
+    }
+  ]
+}
