@@ -37,7 +37,7 @@ class QuizManager:
         
         # --- TÍNH TOÁN KÍCH THƯỚC VÀ VỊ TRÍ (GRID 2x2) ---
         # Chiều rộng nút = khoảng 38% chiều rộng bảng (để chừa khoảng trống ở giữa)
-        btn_w = int(self.board_rect.width * 0.8)
+        btn_w = int(self.board_rect.width)
         btn_h = int(btn_w * btn_ratio) # Chiều cao tự tính theo tỷ lệ ảnh gốc
         
         # Tọa độ gốc của bảng (Góc trên cùng bên trái của bảng)
@@ -47,11 +47,11 @@ class QuizManager:
         bh = self.board_rect.height
 
         # Tính vị trí cho 4 nút
-        row1_y = by + int(bh * 0.23)
-        row2_y = by + int(bh * 0.40)
+        row1_y = by + int(bh * 0.12)
+        row2_y = by + int(bh * 0.3)
         
-        col1_x = bx + int(bw * -0.08)
-        col2_x = bx + int(bw * 0.28)
+        col1_x = bx + int(bw * -0.16)
+        col2_x = bx + int(bw * 0.16)
 
         # Danh sách tọa độ cho [A, B, C, D]
         positions = [
@@ -139,7 +139,7 @@ class QuizManager:
                     
                     # Tính toán vị trí y để chữ nằm giữa nút theo chiều dọc
                     text_x = btn["rect"].left + padding_left
-                    text_y = btn["rect"].centery - (ans_surf.get_height() // 2.5)
+                    text_y = btn["rect"].centery - (ans_surf.get_height() // 3)
                     
                     screen.blit(ans_surf, (text_x, text_y))
 
