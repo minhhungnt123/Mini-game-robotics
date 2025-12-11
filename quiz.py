@@ -46,24 +46,19 @@ class QuizManager:
         bw = self.board_rect.width
         bh = self.board_rect.height
 
-        # Tính vị trí cho 4 nút (Dựa trên % của bảng để luôn chuẩn)
-        # Hàng 1 (A, B) nằm ở khoảng 52% chiều cao bảng (tính từ trên xuống)
-        # Hàng 2 (C, D) nằm ở khoảng 73% chiều cao bảng
-        row1_y = by + int(bh * 0.52)
-        row2_y = by + int(bh * 0.73)
+        # Tính vị trí cho 4 nút
+        row1_y = by + int(bh * 0.23)
+        row2_y = by + int(bh * 0.40)
         
-        # Cột trái (A, C) cách lề trái bảng 10%
-        # Cột phải (B, D) cách lề trái bảng 52%
-        col1_x = bx + int(bw * 0.10)
-        col2_x = bx + int(bw * 0.52)
+        col1_x = bx + int(bw * -0.08)
+        col2_x = bx + int(bw * 0.28)
 
         # Danh sách tọa độ cho [A, B, C, D]
-        # Vị trí: (x, y)
         positions = [
-            (col1_x, row1_y), # A
-            (col2_x, row1_y), # B
-            (col1_x, row2_y), # C
-            (col2_x, row2_y)  # D
+            (col1_x, row1_y),
+            (col2_x, row1_y),
+            (col1_x, row2_y),
+            (col2_x, row2_y)
         ]
         
         for i, label in enumerate(labels):
