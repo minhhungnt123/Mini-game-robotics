@@ -13,34 +13,19 @@ from quiz import QuizManager
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 QUESTION_FILE = os.path.join(BASE_DIR, "questions.json")
 
-# --- HÀM LOAD CÂU HỎI TỪ JSON ---
 def load_all_questions(filepath):
-    """Đọc file JSON và trả về dữ liệu"""
-    if not os.path.exists(filepath):
-        print(f"CẢNH BÁO: Không tìm thấy file {filepath}")
-        return None
+    if not os.path.exists(filepath): return None
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except Exception as e:
-        print(f"Lỗi đọc JSON: {e}")
-        return None
+    except Exception: return None
 
-# --- HÀM LẤY CÂU HỎI THEO ĐỘ KHÓ ---
 def get_question_by_difficulty(game_data, difficulty="easy"):
-    """Lấy ngẫu nhiên 1 câu hỏi từ danh sách easy/medium/hard"""
     if not game_data: return None
-    
-    # Kiểm tra xem độ khó này có trong file JSON không
-    if difficulty in game_data:
-        question_list = game_data[difficulty]
-        if question_list and len(question_list) > 0:
-            return random.choice(question_list)
-    
-    # Nếu không tìm thấy hoặc danh sách rỗng, thử lấy Easy
+    if difficulty in game_data and game_data[difficulty]:
+        return random.choice(game_data[difficulty])
     if "easy" in game_data and game_data["easy"]:
         return random.choice(game_data["easy"])
-        
     return None
 
 # --- KHỞI TẠO GAME ---
@@ -61,6 +46,18 @@ player = Player(200, 480)
 monster_spawner = MonsterSpawner(WIDTH, HEIGHT, 550)
 quiz_ui = QuizManager(WIDTH, HEIGHT)
 
+# --- THANH MÁU & TRẠNG THÁI ---
+player_lives = 5 
+max_lives = 5
+try:
+    heart_img = pygame.image.load(os.path.join(BASE_DIR, "Images", "Map", "hearth.png")).convert_alpha()
+    heart_img = pygame.transform.scale(heart_img, (40, 40))
+except:
+    heart_img = pygame.Surface((40,40))
+    heart_img.fill((255, 0, 0))
+
+combat_state = "NONE" # NONE, VICTORY, DEFEAT, GAME_OVER
+
 # --- VÒNG LẶP GAME ---
 while running:
     for event in pygame.event.get():
@@ -72,82 +69,110 @@ while running:
         if quiz_ui.is_active:
             result = quiz_ui.handle_input(event)
             if result is not None:
-                # result là True (đúng) hoặc False (sai)
-                if result == True:
-                    print("Trả lời ĐÚNG!")
-                    # Xóa con quái đầu tiên
-                    if len(monster_spawner.monsters) > 0:
-                        monster_spawner.monsters.pop(0)
-                        monster_spawner.waiting_for_spawn = False 
-                else:
-                    print("Trả lời SAI!")
-                    # Tạm thời sai vẫn cho qua (hoặc bạn có thể trừ máu ở đây)
-                    if len(monster_spawner.monsters) > 0:
-                        monster_spawner.monsters.pop(0)
-                        monster_spawner.waiting_for_spawn = False 
-            
+                target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
+                
+                if result == True: # ĐÚNG
+                    print("ĐÚNG! Tấn công quái.")
+                    combat_state = "VICTORY"
+                    player.set_action("ATTACK")
+                    if target_monster:
+                        target_monster.set_action("DEATH")
+                        
+                else: # SAI
+                    print("SAI! Bị thương.")
+                    combat_state = "DEFEAT"
+                    player.set_action("HIT")
+                    if target_monster:
+                        target_monster.set_action("ATTACK")
+                    
+                    player_lives -= 1
+                    if player_lives <= 0:
+                        player_lives = 0
+                        combat_state = "GAME_OVER"
+                        player.set_action("DEATH")
+
+    # --- LOGIC UPDATE ---
     game_is_moving = True 
     
-    # Logic va chạm với quái
-    if len(monster_spawner.monsters) > 0:
-        target_monster = monster_spawner.monsters[0]
-        # Tính khoảng cách giữa người chơi và quái
-        distance = target_monster.rect.centerx - player.rect.centerx
+    # 1. Kiểm tra Combat
+    if combat_state != "NONE":
+        game_is_moving = False
         
-        # Nếu khoảng cách < 800px thì dừng màn hình và hiện câu hỏi
-        if 0 < distance < 800: 
-            game_is_moving = False
+        # Xử lý kết thúc animation
+        if combat_state == "VICTORY":
+            if player.animation_finished:
+                if len(monster_spawner.monsters) > 0:
+                    monster_spawner.monsters.pop(0)
+                    monster_spawner.waiting_for_spawn = False
+                combat_state = "NONE"
+                player.set_action("WALK")
+
+        elif combat_state == "DEFEAT":
+            # Chờ player hết bị thương
+            if player.animation_finished:
+                if len(monster_spawner.monsters) > 0:
+                    monster_spawner.monsters.pop(0)
+                    monster_spawner.waiting_for_spawn = False
+                combat_state = "NONE"
+                player.set_action("WALK")
+        
+        elif combat_state == "GAME_OVER":
+            if player.animation_finished:
+                # Dừng game ở đây hoặc hiện menu thua
+                pass
+
+    # 2. Kiểm tra Va chạm (Nếu không combat)
+    if combat_state == "NONE":
+        if len(monster_spawner.monsters) > 0:
+            target_monster = monster_spawner.monsters[0]
+            distance = target_monster.rect.centerx - player.rect.centerx
             
-            # Nếu bảng chưa hiện thì mới bắt đầu hỏi
-            if not quiz_ui.is_active:
-                monster_type = target_monster.type
+            # Chạm trán quái
+            if 0 < distance < 800: 
+                game_is_moving = False
+                player.set_action("IDLE")
                 
-                # --- CHỌN ĐỘ KHÓ DỰA VÀO QUÁI ---
-                difficulty = "easy" 
-                
-                if monster_type == "Frogger":
-                    difficulty = "easy"      # Ếch thì hỏi dễ
-                elif monster_type == "Microwave":
-                    difficulty = "medium"    # Lò vi sóng thì hỏi trung bình
-                    # Hoặc random cả khó: 
-                    # difficulty = random.choice(["medium", "hard"])
-                
-                # Lấy câu hỏi từ dữ liệu
-                raw_q = get_question_by_difficulty(GAME_DATA, difficulty)
-                
-                if raw_q:
-                    # Chuyển đổi format cho QuizManager
-                    # JSON của bạn dùng "answer" (index), QuizManager dùng "correct_index"
-                    question_data = {
-                        "question": raw_q["question"],
-                        "options": raw_q["options"],
-                        "correct_index": raw_q["answer"]
-                    }
-                    quiz_ui.start_quiz(question_data)
-                else:
-                    print("Lỗi: Không lấy được câu hỏi nào!")
-                    # Fallback để game không bị đứng
-                    quiz_ui.start_quiz({
-                        "question": "Lỗi dữ liệu!", 
-                        "options": ["...", "...", "...", "..."], 
-                        "correct_index": 0
-                    })
+                if not quiz_ui.is_active:
+                    m_type = target_monster.type
+                    diff = "easy" if m_type == "Frogger" else "medium"
+                    q_data = get_question_by_difficulty(GAME_DATA, diff)
+                    
+                    if q_data:
+                        quiz_ui.start_quiz({
+                            "question": q_data["question"],
+                            "options": q_data["options"],
+                            "correct_index": q_data["answer"]
+                        })
+                    else:
+                        quiz_ui.start_quiz({
+                            "question": "Lỗi dữ liệu", "options": ["A", "B", "C", "D"], "correct_index": 0
+                        })
+
+    # 3. Gọi hàm Update
+    player.update()
     
-    # Update Animation người chơi
+    # Quan trọng: Monster Update ở đây chỉ tính toán, KHÔNG vẽ
     if game_is_moving:
-        player.set_action("WALK")
+        monster_spawner.update(is_moving=True)
     else:
-        player.set_action("IDLE")
+        monster_spawner.update(is_moving=False)
+
+    # --- VẼ RA MÀN HÌNH (RENDER) ---
+    # Thứ tự vẽ rất quan trọng: Sau -> đè lên Trước
     
-    player.update() 
+    background.draw(screen)                  # 1. Vẽ nền (xóa màn hình cũ)
+    game_map.draw(screen, is_moving=game_is_moving) # 2. Vẽ đất
+    monster_spawner.draw(screen)             # 3. Vẽ quái (ĐÃ SỬA: Vẽ sau nền)
+    screen.blit(player.image, player.rect)   # 4. Vẽ người chơi
     
-    # Vẽ mọi thứ lên màn hình
-    background.draw(screen)      
-    game_map.draw(screen, is_moving=game_is_moving)        
-    monster_spawner.update(screen, is_moving=game_is_moving)  
-    screen.blit(player.image, player.rect)
-    
-    # Vẽ bảng câu hỏi (luôn vẽ cuối cùng để nằm trên cùng)
+    # 5. Vẽ thanh máu
+    for i in range(max_lives):
+        x = 20 + i * 45
+        y = 20
+        if i < player_lives:
+            screen.blit(heart_img, (x, y))
+
+    # 6. Vẽ UI câu hỏi (trên cùng)
     quiz_ui.draw(screen)
     
     pygame.display.update()
