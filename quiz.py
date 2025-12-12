@@ -5,15 +5,15 @@ class QuizManager:
         self.screen_width = screen_width
         self.screen_height = screen_height
         
-        # --- CẤU HÌNH FONT CHỮ ---
+        # --- CẤU HÌNH FONT CHỮ --- 
         try:
             # Font câu hỏi to hơn
-            self.font_q = pygame.font.SysFont("Arial", 26, bold=True)
+            self.font_q = pygame.font.Font("Font\Mitr\Mitr-Medium.ttf", 24)
             # Font đáp án nhỏ hơn chút để vừa nút
-            self.font_a = pygame.font.SysFont("Arial", 22, bold=True)
+            self.font_a = pygame.font.Font("Font\Mitr\Mitr-Medium.ttf", 16)
         except:
-            self.font_q = pygame.font.Font(None, 30)
-            self.font_a = pygame.font.Font(None, 26)
+            self.font_q = pygame.font.SysFont("Arial", 30, bold=True)
+            self.font_a = pygame.font.SysFont("Arial", 24, bold=True)
 
         # --- XỬ LÝ ẢNH BẢNG (BOARD) ---
         raw_board = pygame.image.load("Images/Board/board.png").convert_alpha()
@@ -113,7 +113,7 @@ class QuizManager:
             lines.append(curr_line)
 
             # Vị trí bắt đầu vẽ câu hỏi (khoảng 22% từ đỉnh bảng xuống)
-            start_text_y = self.board_rect.top + int(self.board_rect.height * 0.4)
+            start_text_y = self.board_rect.top + int(self.board_rect.height * 0.38)
             
             for i, line in enumerate(lines):
                 text_surf = self.font_q.render(line, True, (255, 255, 255)) # Chữ trắng
@@ -135,11 +135,11 @@ class QuizManager:
                     # Căn chỉnh chữ:
                     # Chữ cần nằm lệch sang phải để không đè lên hình bánh răng (A/B/C/D)
                     # Dịch sang phải khoảng 22% chiều rộng của nút
-                    padding_left = int(btn["rect"].width * 0.25) 
+                    padding_left = int(btn["rect"].width * 0.46)
                     
                     # Tính toán vị trí y để chữ nằm giữa nút theo chiều dọc
                     text_x = btn["rect"].left + padding_left
-                    text_y = btn["rect"].centery - (ans_surf.get_height() // 3)
+                    text_y = btn["rect"].centery - (ans_surf.get_height() // 1.5)
                     
                     screen.blit(ans_surf, (text_x, text_y))
 
