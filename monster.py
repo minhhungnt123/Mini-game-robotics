@@ -33,6 +33,14 @@ class Monster(pygame.sprite.Sprite):
                 "ATTACK": {"img": "frogger_spit.png", "w": 80, "h": 48},
                 "HURT":   {"img": "frogger_hurt.png", "w": 48, "h": 48}
             }
+            
+        elif monster_type == "Scout":
+            self.scale = 2.5
+            self.speed = 2
+            self.monster_data = {
+                "RUN":  {"img": "Scout_fly.png", "w": 672, "h": 574},
+                "IDLE": {"img": "Scout_idle.png", "w": 672, "h": 574},
+            }
 
         self.animations = {}
         
