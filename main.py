@@ -98,9 +98,17 @@ while running:
     if combat_state != "NONE":
         game_is_moving = False
         
-        # Xử lý kết thúc animation
+        # --- [SỬA ĐỔI QUAN TRỌNG] ---
         if combat_state == "VICTORY":
-            if player.animation_finished:
+            # Lấy quái vật hiện tại
+            target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
+            
+            # Kiểm tra xem CẢ HAI đã diễn xong animation chưa
+            player_done = player.animation_finished
+            monster_done = target_monster.animation_finished if target_monster else True
+
+            # Chỉ khi cả 2 xong (đặc biệt là quái đã diễn xong cảnh chết) mới xóa
+            if player_done and monster_done:
                 if len(monster_spawner.monsters) > 0:
                     monster_spawner.monsters.pop(0)
                     monster_spawner.waiting_for_spawn = False
@@ -108,8 +116,13 @@ while running:
                 player.set_action("WALK")
 
         elif combat_state == "DEFEAT":
-            # Chờ player hết bị thương
-            if player.animation_finished:
+            target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
+            player_done = player.animation_finished
+            monster_done = target_monster.animation_finished if target_monster else True
+
+            # Khi trả lời sai, chờ cả 2 diễn xong (Monster đánh xong, Player hết bị thương)
+            if player_done and monster_done:
+                # Quái đánh xong thì biến mất để đi tiếp (theo logic cũ)
                 if len(monster_spawner.monsters) > 0:
                     monster_spawner.monsters.pop(0)
                     monster_spawner.waiting_for_spawn = False
@@ -118,7 +131,7 @@ while running:
         
         elif combat_state == "GAME_OVER":
             if player.animation_finished:
-                # Dừng game ở đây hoặc hiện menu thua
+                # Có thể hiện màn hình Game Over ở đây
                 pass
 
     # 2. Kiểm tra Va chạm (Nếu không combat)
@@ -151,28 +164,27 @@ while running:
     # 3. Gọi hàm Update
     player.update()
     
-    # Quan trọng: Monster Update ở đây chỉ tính toán, KHÔNG vẽ
+    # Quan trọng: Monster Update ở đây chỉ tính toán animation
     if game_is_moving:
         monster_spawner.update(is_moving=True)
     else:
+        # Khi dừng màn hình (trả lời hoặc combat), quái vẫn cần update để chạy animation (is_moving=False)
         monster_spawner.update(is_moving=False)
 
     # --- VẼ RA MÀN HÌNH (RENDER) ---
-    # Thứ tự vẽ rất quan trọng: Sau -> đè lên Trước
+    background.draw(screen)                  
+    game_map.draw(screen, is_moving=game_is_moving) 
+    monster_spawner.draw(screen)             # Vẽ quái sau Background/Map để không bị che
+    screen.blit(player.image, player.rect)   
     
-    background.draw(screen)                  # 1. Vẽ nền (xóa màn hình cũ)
-    game_map.draw(screen, is_moving=game_is_moving) # 2. Vẽ đất
-    monster_spawner.draw(screen)             # 3. Vẽ quái (ĐÃ SỬA: Vẽ sau nền)
-    screen.blit(player.image, player.rect)   # 4. Vẽ người chơi
-    
-    # 5. Vẽ thanh máu
+    # Vẽ thanh máu
     for i in range(max_lives):
         x = 20 + i * 45
         y = 20
         if i < player_lives:
             screen.blit(heart_img, (x, y))
 
-    # 6. Vẽ UI câu hỏi (trên cùng)
+    # Vẽ UI câu hỏi
     quiz_ui.draw(screen)
     
     pygame.display.update()
