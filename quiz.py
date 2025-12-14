@@ -37,7 +37,7 @@ class QuizManager:
         
         # --- TÍNH TOÁN KÍCH THƯỚC VÀ VỊ TRÍ (GRID 2x2) ---
         # Chiều rộng nút = khoảng 38% chiều rộng bảng (để chừa khoảng trống ở giữa)
-        btn_w = int(self.board_rect.width)
+        btn_w = int(self.board_rect.width * 0.3)
         btn_h = int(btn_w * btn_ratio) # Chiều cao tự tính theo tỷ lệ ảnh gốc
         
         # Tọa độ gốc của bảng (Góc trên cùng bên trái của bảng)
@@ -47,11 +47,11 @@ class QuizManager:
         bh = self.board_rect.height
 
         # Tính vị trí cho 4 nút
-        row1_y = by + int(bh * 0.12)
-        row2_y = by + int(bh * 0.3)
+        row1_y = by + int(bh * 0.46)
+        row2_y = by + int(bh * 0.65)
         
-        col1_x = bx + int(bw * -0.16)
-        col2_x = bx + int(bw * 0.16)
+        col1_x = bx + int(bw * 0.2)
+        col2_x = bx + int(bw * 0.51)
 
         # Danh sách tọa độ cho [A, B, C, D]
         positions = [
@@ -129,17 +129,28 @@ class QuizManager:
                 if i < len(self.current_question["options"]):
                     ans_text = self.current_question["options"][i]
                     
-                    # Render chữ màu trắng hoặc vàng nhạt cho nổi bật trên nút
+                    # 1. Tạo ảnh chữ gốc
                     ans_surf = self.font_a.render(ans_text, True, (255, 255, 255)) 
                     
-                    # Căn chỉnh chữ:
-                    # Chữ cần nằm lệch sang phải để không đè lên hình bánh răng (A/B/C/D)
-                    # Dịch sang phải khoảng 22% chiều rộng của nút
-                    padding_left = int(btn["rect"].width * 0.46)
+                    # 2. Tính toán lề trái (Khoảng cách tránh icon A/B/C/D)
+                    # Bạn có thể giảm 0.46 xuống 0.42 nếu muốn chữ lùi sang trái thêm chút nữa
+                    padding_left = int(btn["rect"].width * 0.38) 
                     
-                    # Tính toán vị trí y để chữ nằm giữa nút theo chiều dọc
+                    # 3. --- LOGIC CHỐNG TRÀN (MỚI) ---
+                    # Tính khoảng trống tối đa cho phép hiển thị chữ
+                    # (Chiều rộng nút - Lề trái - 10px lề phải cho đẹp)
+                    available_width = btn["rect"].width - padding_left - 1
+                    
+                    # Nếu chữ dài hơn khoảng trống cho phép, thì thu nhỏ nó lại
+                    if ans_surf.get_width() > available_width:
+                        scale_factor = available_width / ans_surf.get_width()
+                        new_height = int(ans_surf.get_height() * scale_factor)
+                        ans_surf = pygame.transform.smoothscale(ans_surf, (available_width, new_height))
+                    # ---------------------------------
+
+                    # 4. Vẽ chữ đã xử lý lên màn hình
                     text_x = btn["rect"].left + padding_left
-                    text_y = btn["rect"].centery - (ans_surf.get_height() // 1.5)
+                    text_y = btn["rect"].centery - (ans_surf.get_height() // 1.5) # Canh giữa theo chiều dọc
                     
                     screen.blit(ans_surf, (text_x, text_y))
 
