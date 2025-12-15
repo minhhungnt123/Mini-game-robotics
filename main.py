@@ -73,9 +73,10 @@ ground_offset_target = 0
 ground_offset_current = 400 # Đẩy xuống 400px
 
 # --- QUẢN LÝ TRẠNG THÁI ---
-# Biến phụ cho Cinematic
-cinematic_phase = 0 # 0: Ground Fly-in, 1: Wait 2s, 2: Player & Heart Fly-in
-cinematic_timer = 0 # Dùng để đếm thời gian chờ
+cinematic_phase = 0
+cinematic_timer = 0 
+combat_state = "NONE" 
+combat_timer = 5
 
 game_state = "MENU_INTRO"
 menu.trigger_intro()
@@ -188,19 +189,22 @@ while running:
         target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
 
         if quiz_result is not None:
+            target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
+            
             if quiz_result == True: 
-                combat_state = "VICTORY"
+                # TRẢ LỜI ĐÚNG:
+                # Giai đoạn 1: Player tấn công trước
+                combat_state = "VICTORY_PHASE_1"
                 player.set_action("ATTACK")
-                if target_monster: target_monster.set_action("DEATH")
+                # Monster tạm thời đứng yên chịu trận
+                if target_monster: target_monster.set_action("IDLE")
             else: 
-                combat_state = "DEFEAT"
-                player.set_action("HIT")
+                # TRẢ LỜI SAI:
+                # Giai đoạn 1: Monster tấn công trước
+                combat_state = "DEFEAT_PHASE_1"
                 if target_monster: target_monster.set_action("ATTACK")
-                player_lives -= 1
-                if player_lives <= 0:
-                    player_lives = 0
-                    combat_state = "GAME_OVER"
-                    player.set_action("DEATH")
+                # Player tạm thời đứng yên
+                player.set_action("IDLE")
         
         # Sửa logic get question (fix lỗi KeyError)
         if len(monster_spawner.monsters) > 0 and combat_state == "NONE":
@@ -227,16 +231,120 @@ while running:
 
         if combat_state != "NONE":
             game_is_moving = False
-            # Logic animation combat (giữ nguyên)
-            player_done = player.animation_finished
-            monster_done = target_monster.animation_finished if target_monster else True
-            if player_done and monster_done:
-                if combat_state in ["VICTORY", "DEFEAT"]:
+            target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
+            
+            # --- TRƯỜNG HỢP 1: NGƯỜI CHƠI THẮNG ---
+            if combat_state == "VICTORY_PHASE_1":
+                # Chờ Player chém xong
+                if player.animation_finished:
+                    combat_state = "VICTORY_PHASE_2"
+                    player.set_action("IDLE") 
+                    if target_monster: target_monster.set_action("DEATH")
+
+            elif combat_state == "VICTORY_PHASE_2":
+                # Chờ Quái chết xong
+                monster_done = target_monster.animation_finished if target_monster else True
+                if monster_done:
+                    # Xóa quái khỏi màn hình ngay lập tức
+                    if len(monster_spawner.monsters) > 0:
+                        monster_spawner.monsters.pop(0)
+                        # LƯU Ý QUAN TRỌNG: Chưa set waiting_for_spawn = False vội
+                        # Để ngăn con mới xuất hiện ngay lúc này
+                    
+                    # Chuyển sang trạng thái nghỉ (Cooldown)
+                    combat_state = "COOLDOWN"
+                    combat_timer = pygame.time.get_ticks() # Bắt đầu đếm giờ
+                    player.set_action("IDLE") # Người chơi đứng nghỉ ngơi
+
+            # --- TRƯỜNG HỢP 2: NGƯỜI CHƠI THUA ---
+            elif combat_state == "DEFEAT_PHASE_1":
+                # Chờ Quái đánh xong
+                monster_done = target_monster.animation_finished if target_monster else True
+                if monster_done:
+                    combat_state = "DEFEAT_PHASE_2"
+                    if target_monster: target_monster.set_action("IDLE") 
+                    player.set_action("HIT")
+                    
+                    player_lives -= 1
+                    if player_lives <= 0: player_lives = 0
+
+            elif combat_state == "DEFEAT_PHASE_2":
+                # Chờ Player bị đau xong
+                if player.animation_finished:
+                    if player_lives == 0:
+                        combat_state = "GAME_OVER"
+                        player.set_action("DEATH")
+                    else:
+                        # Nếu còn sống thì cũng cho nghỉ 1 chút trước khi đánh tiếp
+                        combat_state = "COOLDOWN"
+                        combat_timer = pygame.time.get_ticks()
+                        player.set_action("IDLE")
+
+            # --- TRƯỜNG HỢP 3: THỜI GIAN NGHỈ (QUAN TRỌNG) ---
+            elif combat_state == "COOLDOWN":
+                # Đợi 1500ms (1.5 giây)
+                if pygame.time.get_ticks() - combat_timer > 1500:
+                    combat_state = "NONE"
+                    player.set_action("WALK")
+                    
+                    # Lúc này mới cho phép quái vật tiếp theo xuất hiện
+                    monster_spawner.waiting_for_spawn = False 
+
+            # --- GAME OVER ---
+            elif combat_state == "GAME_OVER":
+                pass
+            game_is_moving = False
+            target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
+            
+            # --- TRƯỜNG HỢP 1: NGƯỜI CHƠI THẮNG ---
+            if combat_state == "VICTORY_PHASE_1":
+                # Chờ Player chém xong
+                if player.animation_finished:
+                    # Chuyển sang Giai đoạn 2: Quái chết
+                    combat_state = "VICTORY_PHASE_2"
+                    player.set_action("IDLE") # Player đánh xong thì đứng nghỉ
+                    if target_monster: target_monster.set_action("DEATH")
+
+            elif combat_state == "VICTORY_PHASE_2":
+                # Chờ Quái diễn hoạt chết xong
+                monster_done = target_monster.animation_finished if target_monster else True
+                if monster_done:
+                    # Xong hết -> Xóa quái và tiếp tục đi
                     if len(monster_spawner.monsters) > 0:
                         monster_spawner.monsters.pop(0)
                         monster_spawner.waiting_for_spawn = False
                     combat_state = "NONE"
                     player.set_action("WALK")
+
+            # --- TRƯỜNG HỢP 2: NGƯỜI CHƠI THUA ---
+            elif combat_state == "DEFEAT_PHASE_1":
+                # Chờ Quái đánh xong
+                monster_done = target_monster.animation_finished if target_monster else True
+                if monster_done:
+                    # Chuyển sang Giai đoạn 2: Player bị thương
+                    combat_state = "DEFEAT_PHASE_2"
+                    if target_monster: target_monster.set_action("IDLE") # Quái đánh xong đứng nghỉ
+                    player.set_action("HIT")
+                    
+                    # Trừ máu ngay lúc bị đánh trúng này mới hợp lý
+                    player_lives -= 1
+                    if player_lives <= 0: player_lives = 0
+
+            elif combat_state == "DEFEAT_PHASE_2":
+                # Chờ Player diễn hoạt bị đau xong
+                if player.animation_finished:
+                    if player_lives == 0:
+                        combat_state = "GAME_OVER"
+                        player.set_action("DEATH")
+                    else:
+                        # Còn máu thì đi tiếp
+                        combat_state = "NONE"
+                        player.set_action("WALK")
+            
+            # --- TRƯỜNG HỢP GAME OVER ---
+            elif combat_state == "GAME_OVER":
+                # Có thể thêm logic hiện màn hình thua cuộc ở đây
+                pass
 
         # Update & Draw
         player.update()
