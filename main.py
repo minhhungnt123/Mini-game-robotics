@@ -59,7 +59,62 @@ except:
 combat_state = "NONE" # NONE, VICTORY, DEFEAT, GAME_OVER
 
 # --- VÒNG LẶP GAME ---
+# --- VÒNG LẶP GAME ---
 while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            sys.exit()
+
+        if quiz_ui.is_active:
+            quiz_ui.handle_input(event)
+
+    # ===== UPDATE QUIZ (BẮT BUỘC) =====
+    quiz_result = quiz_ui.update()
+    if quiz_result is not None:
+        target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
+
+        if quiz_result:
+            combat_state = "VICTORY"
+            player.set_action("ATTACK")
+            if target_monster:
+                target_monster.set_action("DEATH")
+        else:
+            combat_state = "DEFEAT"
+            player.set_action("HIT")
+            if target_monster:
+                target_monster.set_action("ATTACK")
+
+            player_lives -= 1
+            if player_lives <= 0:
+                player_lives = 0
+                combat_state = "GAME_OVER"
+                player.set_action("DEATH")
+
+    # ===== PHẦN CŨ GIỮ NGUYÊN =====
+    game_is_moving = combat_state == "NONE"
+
+    player.update()
+
+    if game_is_moving:
+        monster_spawner.update(is_moving=True)
+    else:
+        monster_spawner.update(is_moving=False)
+
+    background.draw(screen)
+    game_map.draw(screen, is_moving=game_is_moving)
+    monster_spawner.draw(screen)
+    screen.blit(player.image, player.rect)
+
+    for i in range(max_lives):
+        if i < player_lives:
+            screen.blit(heart_img, (20 + i * 45, 20))
+
+    quiz_ui.draw(screen)
+
+    pygame.display.flip()
+    clock.tick(60)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
