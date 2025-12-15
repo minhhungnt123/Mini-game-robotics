@@ -185,7 +185,7 @@ class QuizManager:
         # question
         max_w = int(self.board_rect.width * 0.75)
         q_lines = self._wrap_2_lines(self.question["question"], self.font_q, max_w)
-        y = self.board_rect.top + int(self.board_rect.height * 0.33)
+        y = self.board_rect.top + int(self.board_rect.height * 0.38)
 
         for l in q_lines:
             surf = self.font_q.render(l, True, WHITE)
@@ -210,7 +210,7 @@ class QuizManager:
                 avail = b["rect"].width - padding - 20
                 lines = self._wrap_2_lines(self.question["options"][i], self.font_a, avail)
 
-                ty = b["rect"].centery - (len(lines) * 18) // 2
+                ty = b["rect"].centery - (len(lines) * 30) // 2
                 for line in lines:
                     surf = self.font_a.render(line, True, WHITE)
                     screen.blit(surf, (b["rect"].left + padding, ty))
