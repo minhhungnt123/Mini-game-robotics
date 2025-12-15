@@ -8,6 +8,7 @@ from map import Map
 from plx import ParallaxBackground
 from monster import MonsterSpawner
 from quiz import QuizManager
+from menu import Menu 
 
 # --- CẤU HÌNH ĐƯỜNG DẪN ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -42,159 +43,212 @@ GAME_DATA = load_all_questions(QUESTION_FILE)
 # --- KHỞI TẠO ĐỐI TƯỢNG ---
 background = ParallaxBackground(WIDTH, HEIGHT)
 game_map = Map()
-player = Player(200, 580) 
-monster_spawner = MonsterSpawner(WIDTH, HEIGHT, 650)
+menu = Menu(WIDTH, HEIGHT)
 quiz_ui = QuizManager(WIDTH, HEIGHT)
 
-# --- THANH MÁU & TRẠNG THÁI ---
+# --- CẤU HÌNH CINEMATIC ---
+# 1. Player: Bắt đầu bên trái ngoài màn hình
+START_PLAYER_X = -100
+DEFAULT_PLAYER_X = 80
+player = Player(START_PLAYER_X, 580) 
+
+monster_spawner = MonsterSpawner(WIDTH, HEIGHT, 650)
+
+# 2. Heart: Bắt đầu bên trên ngoài màn hình
 player_lives = 5 
 max_lives = 5
+heart_y_target = 20
+heart_y_current = -100 
+
 try:
     heart_path = os.path.join(BASE_DIR, "Images", "Map", "hearth.png")
-    if os.path.exists(heart_path):
-        heart_img = pygame.image.load(heart_path).convert_alpha()
-        heart_img = pygame.transform.scale(heart_img, (40, 40))
-    else:
-        raise Exception("Heart image missing")
+    heart_img = pygame.image.load(heart_path).convert_alpha()
+    heart_img = pygame.transform.scale(heart_img, (40, 40))
 except:
     heart_img = pygame.Surface((40,40))
     heart_img.fill((255, 0, 0))
 
-combat_state = "NONE" # NONE, VICTORY, DEFEAT, GAME_OVER
+# 3. Ground: Bắt đầu bên dưới ngoài màn hình (Offset dương lớn)
+ground_offset_target = 0
+ground_offset_current = 400 # Đẩy xuống 400px
 
-# --- VÒNG LẶP GAME ---
+# --- QUẢN LÝ TRẠNG THÁI ---
+# Biến phụ cho Cinematic
+cinematic_phase = 0 # 0: Ground Fly-in, 1: Wait 2s, 2: Player & Heart Fly-in
+cinematic_timer = 0 # Dùng để đếm thời gian chờ
+
+game_state = "MENU_INTRO"
+menu.trigger_intro()
+
+combat_state = "NONE" 
+
+def draw_hearts(screen, lives, max_lives, y_pos):
+    for i in range(max_lives):
+        if i < lives:
+            screen.blit(heart_img, (20 + i * 45, y_pos))
+
+# --- VÒNG LẶP CHÍNH ---
 while running:
-    # 1. XỬ LÝ SỰ KIỆN (CHỈ DÙNG 1 VÒNG LẶP DUY NHẤT)
-    for event in pygame.event.get():
+    events = pygame.event.get()
+    for event in events:
         if event.type == pygame.QUIT:
             running = False
             sys.exit()
 
-        if quiz_ui.is_active:
+        if game_state == "MENU_ACTIVE":
+            action = menu.handle_input(event)
+            if action == "START":
+                menu.trigger_outro()
+                game_state = "MENU_OUTRO"
+            elif action == "SETTING":
+                print("Setting clicked")
+
+        if game_state == "PLAYING" and quiz_ui.is_active:
             quiz_ui.handle_input(event)
 
-    # 2. CẬP NHẬT LOGIC QUIZ
-    # Kiểm tra xem người chơi đã trả lời xong chưa (hiệu ứng fade out xong chưa)
-    quiz_result = quiz_ui.update()
+    # ================= LOGIC GAME =================
     
-    if quiz_result is not None:
-        # Lấy quái vật hiện tại để set animation
+    # 1. MENU PHASES
+    if game_state in ["MENU_INTRO", "MENU_ACTIVE", "MENU_OUTRO"]:
+        status = menu.update()
+        if status == "ACTIVE":
+            game_state = "MENU_ACTIVE"
+        elif status == "DONE":
+            # Chuyển sang Cinematic
+            game_state = "GAME_CINEMATIC"
+            cinematic_phase = 0 # Bắt đầu phase 0: Ground bay vào
+            player.set_action("WALK") 
+
+        # Khi ở Menu: Ground bị đẩy xuống dưới (ẩn đi)
+        background.draw(screen) 
+        # Gọi draw với offset lớn để giấu đất đi
+        game_map.draw(screen, is_moving=False, offset_y=400) 
+        menu.draw(screen)
+
+    # 2. CINEMATIC PHASES
+    elif game_state == "GAME_CINEMATIC":
+        # Luôn vẽ background
+        background.draw(screen)
+
+        # --- PHASE 0: Ground bay từ dưới lên ---
+        if cinematic_phase == 0:
+            # Ground di chuyển lên (giảm offset)
+            if ground_offset_current > ground_offset_target:
+                ground_offset_current -= 5 # Tốc độ bay lên của đất
+            else:
+                ground_offset_current = ground_offset_target
+                # Xong việc bay lên -> Chuyển sang chờ
+                cinematic_phase = 1
+                cinematic_timer = pygame.time.get_ticks() # Bắt đầu đếm giờ
+
+        # --- PHASE 1: Chờ 2 giây ---
+        elif cinematic_phase == 1:
+            # Kiểm tra thời gian
+            if pygame.time.get_ticks() - cinematic_timer >= 2000: # 2000ms = 2s
+                cinematic_phase = 2
+        
+        # --- PHASE 2: Player & Heart bay vào cùng lúc ---
+        elif cinematic_phase == 2:
+            # Player chạy vào
+            player_done = False
+            if player.rect.x < DEFAULT_PLAYER_X:
+                player.rect.x += 5
+                player.update()
+            else:
+                player.rect.x = DEFAULT_PLAYER_X
+                player.set_action("IDLE")
+                player_done = True
+            
+            # Heart bay xuống
+            heart_done = False
+            if heart_y_current < heart_y_target:
+                heart_y_current += 2
+            else:
+                heart_y_current = heart_y_target
+                heart_done = True
+
+            # Nếu cả 2 đã vào vị trí -> Vào Game
+            if player_done and heart_done:
+                game_state = "PLAYING"
+                monster_spawner.last_spawn_time = pygame.time.get_ticks()
+
+        # --- RENDER TRONG LÚC CINEMATIC ---
+        # Ground luôn scroll (is_moving=True) và áp dụng offset hiện tại
+        game_map.draw(screen, is_moving=True, offset_y=ground_offset_current)
+        
+        # Chỉ vẽ Player và Heart khi ở Phase 2 (hoặc nếu bạn muốn vẽ nó chờ ở ngoài cũng được)
+        screen.blit(player.image, player.rect)
+        draw_hearts(screen, player_lives, max_lives, heart_y_current)
+
+
+    # 3. PLAYING PHASE (Game chính)
+    elif game_state == "PLAYING":
+        # ... (Logic game cũ giữ nguyên) ...
+        quiz_result = quiz_ui.update()
         target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
 
-        if quiz_result == True: # Trả lời ĐÚNG
-            print("ĐÚNG! Tấn công quái.")
-            combat_state = "VICTORY"
-            player.set_action("ATTACK")
-            if target_monster:
-                target_monster.set_action("DEATH")
-        else: # Trả lời SAI
-            print("SAI! Bị thương.")
-            combat_state = "DEFEAT"
-            player.set_action("HIT")
-            if target_monster:
-                target_monster.set_action("ATTACK") # Hoặc animation tấn công của quái
-
-            player_lives -= 1
-            if player_lives <= 0:
-                player_lives = 0
-                combat_state = "GAME_OVER"
-                player.set_action("DEATH")
-
-    # 3. QUẢN LÝ TRẠNG THÁI GAME (STATE MACHINE)
-    game_is_moving = True # Mặc định là di chuyển
-
-    if combat_state != "NONE":
-        game_is_moving = False # Đang đánh nhau thì nền không trôi
+        if quiz_result is not None:
+            if quiz_result == True: 
+                combat_state = "VICTORY"
+                player.set_action("ATTACK")
+                if target_monster: target_monster.set_action("DEATH")
+            else: 
+                combat_state = "DEFEAT"
+                player.set_action("HIT")
+                if target_monster: target_monster.set_action("ATTACK")
+                player_lives -= 1
+                if player_lives <= 0:
+                    player_lives = 0
+                    combat_state = "GAME_OVER"
+                    player.set_action("DEATH")
         
-        # --- XỬ LÝ KHI ANIMATION KẾT THÚC ---
-        if combat_state == "VICTORY":
-            target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
-            
-            # Kiểm tra cả 2 đã diễn xong chưa
-            player_done = player.animation_finished
-            monster_done = target_monster.animation_finished if target_monster else True
+        # Sửa logic get question (fix lỗi KeyError)
+        if len(monster_spawner.monsters) > 0 and combat_state == "NONE":
+             target_monster = monster_spawner.monsters[0]
+             distance = target_monster.rect.centerx - player.rect.centerx
+             if 0 < distance < 700:
+                 game_is_moving = False
+                 player.set_action("IDLE")
+                 if not quiz_ui.is_active:
+                     m_type = target_monster.type
+                     diff = "easy" if m_type == "Frogger" else "medium"
+                     q_data = get_question_by_difficulty(GAME_DATA, diff)
+                     if q_data:
+                         # FIX LỖI KEY ERROR TẠI ĐÂY
+                         quiz_ui.start_quiz({
+                             "question": q_data["question"],
+                             "options": q_data["options"],
+                             "correct_index": q_data["answer"] # Đổi key 'answer' -> 'correct_index'
+                         })
+                     else:
+                         quiz_ui.start_quiz({"question":"1+1=?","options":["1","2"],"correct_index":1})
+        else:
+             game_is_moving = True
 
-            if player_done and monster_done:
-                # Xóa quái vật đã chết
-                if len(monster_spawner.monsters) > 0:
-                    monster_spawner.monsters.pop(0)
-                    monster_spawner.waiting_for_spawn = False
-                
-                # Reset trạng thái để đi tiếp
-                combat_state = "NONE"
-                player.set_action("WALK")
-
-        elif combat_state == "DEFEAT":
-            target_monster = monster_spawner.monsters[0] if monster_spawner.monsters else None
-            player_done = player.animation_finished
-            monster_done = target_monster.animation_finished if target_monster else True
-
-            if player_done and monster_done:
-                # Logic cũ của bạn: quái biến mất sau khi đánh mình (để game đi tiếp)
-                if len(monster_spawner.monsters) > 0:
-                    monster_spawner.monsters.pop(0)
-                    monster_spawner.waiting_for_spawn = False
-                
-                combat_state = "NONE"
-                player.set_action("WALK")
-        
-        elif combat_state == "GAME_OVER":
+        if combat_state != "NONE":
             game_is_moving = False
-            # Ở đây bạn có thể vẽ thêm màn hình Game Over hoặc nút Restart
+            # Logic animation combat (giữ nguyên)
+            player_done = player.animation_finished
+            monster_done = target_monster.animation_finished if target_monster else True
+            if player_done and monster_done:
+                if combat_state in ["VICTORY", "DEFEAT"]:
+                    if len(monster_spawner.monsters) > 0:
+                        monster_spawner.monsters.pop(0)
+                        monster_spawner.waiting_for_spawn = False
+                    combat_state = "NONE"
+                    player.set_action("WALK")
 
-    # 4. KIỂM TRA VA CHẠM (NẾU KHÔNG TRONG COMBAT)
-    else: # combat_state == "NONE"
-        if len(monster_spawner.monsters) > 0:
-            target_monster = monster_spawner.monsters[0]
-            # Tính khoảng cách
-            distance = target_monster.rect.centerx - player.rect.centerx
-            
-            if 0 < distance < 800: 
-                game_is_moving = False
-                player.set_action("IDLE")
-                
-                # Chỉ bật quiz nếu chưa bật
-                if not quiz_ui.is_active:
-                    m_type = target_monster.type
-                    diff = "easy" if m_type == "Frogger" else "medium"
-                    q_data = get_question_by_difficulty(GAME_DATA, diff)
-                    
-                    if q_data:
-                        quiz_ui.start_quiz({
-                            "question": q_data["question"],
-                            "options": q_data["options"],
-                            "correct_index": q_data["answer"]
-                        })
-                    else:
-                        # Fallback nếu không load được câu hỏi
-                        quiz_ui.start_quiz({
-                            "question": "1 + 1 = ?", 
-                            "options": ["1", "2", "3", "4"], 
-                            "correct_index": 1
-                        })
+        # Update & Draw
+        player.update()
+        monster_spawner.update(is_moving=game_is_moving)
 
-    # 5. UPDATE CÁC ĐỐI TƯỢNG (CHỈ GỌI 1 LẦN DUY NHẤT)
-    player.update()
-    
-    # Monster update nhận vào biến is_moving
-    if game_is_moving:
-        monster_spawner.update(is_moving=True)
-    else:
-        monster_spawner.update(is_moving=False)
-
-    # 6. VẼ RA MÀN HÌNH (RENDER - CHỈ GỌI 1 LẦN DUY NHẤT)
-    background.draw(screen)
-    game_map.draw(screen, is_moving=game_is_moving)
-    monster_spawner.draw(screen)
-    screen.blit(player.image, player.rect)
-
-    # Vẽ thanh máu
-    for i in range(max_lives):
-        if i < player_lives:
-            screen.blit(heart_img, (20 + i * 45, 20))
-
-    # Vẽ UI câu hỏi sau cùng
-    quiz_ui.draw(screen)
+        background.draw(screen)
+        # Khi chơi game, offset_y = 0
+        game_map.draw(screen, is_moving=game_is_moving, offset_y=0) 
+        monster_spawner.draw(screen)
+        screen.blit(player.image, player.rect)
+        draw_hearts(screen, player_lives, max_lives, heart_y_current)
+        quiz_ui.draw(screen)
 
     pygame.display.flip()
     clock.tick(60)

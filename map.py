@@ -9,14 +9,16 @@ class Map:
         self.height = self.image.get_height()
 
     # Thêm tham số is_moving
-    def draw(self, screen, is_moving=True):
+    def draw(self, screen, is_moving=True, offset_y=0):
         if is_moving:
             self.ground_scroll -= self.scroll_speed
             if abs(self.ground_scroll) > self.width: # Reset khi trôi hết 1 ảnh
                 self.ground_scroll = 0
         
         # Logic vẽ nối tiếp
-        y_pos = screen.get_height() - self.height
+        # Cộng thêm offset_y vào vị trí Y
+        y_pos = (screen.get_height() - self.height) + offset_y
+        
         current_x = self.ground_scroll
         while current_x < screen.get_width():
             screen.blit(self.image, (current_x, y_pos))
