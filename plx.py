@@ -7,7 +7,7 @@ class ParallaxBackground:
         self.images = []
         
         # Load 5 ảnh từ plx-1.png đến plx-5.png
-        for i in range(1, 6):
+        for i in range(1, 3):
             try:
                 # Đường dẫn ảnh
                 image_path = f"Images/parallax background/plx-{i}.png"

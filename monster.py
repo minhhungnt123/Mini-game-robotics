@@ -180,6 +180,6 @@ class MonsterSpawner:
             monster.draw(screen)
 
     def spawn(self):
-        m_type = random.choice(["Microwave", "Frogger"])
+        m_type = random.choice(["Microwave", "Frogger", "Scout"])
         new_monster = Monster(m_type, self.width, self.ground_y)
         self.monsters.append(new_monster)
