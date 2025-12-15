@@ -43,7 +43,7 @@ GAME_DATA = load_all_questions(QUESTION_FILE)
 background = ParallaxBackground(WIDTH, HEIGHT)
 game_map = Map()
 player = Player(200, 580) 
-monster_spawner = MonsterSpawner(WIDTH, HEIGHT, 580)
+monster_spawner = MonsterSpawner(WIDTH, HEIGHT, 650)
 quiz_ui = QuizManager(WIDTH, HEIGHT)
 
 # --- THANH MÁU & TRẠNG THÁI ---
