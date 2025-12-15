@@ -38,13 +38,13 @@ class Monster(pygame.sprite.Sprite):
             }
             
         elif monster_type == "Scout":
-            self.scale = 3
+            self.scale = 1
             self.speed = 2
             self.monster_data = {
-                "RUN":    {"img": "Scout_fly.png",   "w": 80, "h": 80},
-                "IDLE":   {"img": "Scout_idle.png",   "w": 80, "h": 80},
-                "ATTACK": {"img": "Scout_attack.png", "w": 80, "h": 80},
-                "DEATH":  {"img": "Scout_death.png",  "w": 80, "h": 80},
+                "RUN":    {"img": "Scout_fly.png",   "w": 336, "h": 288},
+                "IDLE":   {"img": "Scout_idle.png",   "w": 336, "h": 288},
+                "ATTACK": {"img": "Scout_attack.png", "w": 336, "h": 288},
+                "DEATH":  {"img": "Scout_death.png",  "w": 336, "h": 288},
             }
 
         self.animations = {}
