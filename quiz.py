@@ -117,8 +117,6 @@ class QuizManager:
             return None
 
         mouse = pygame.mouse.get_pos()
-
-        # chỉ cho 1 hover
         hovered = None
         for b in self.buttons:
             b["hover"] = False

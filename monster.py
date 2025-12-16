@@ -13,7 +13,7 @@ class Monster(pygame.sprite.Sprite):
         self.animation_speed = 0.15
         self.frame_index = 0
         self.monster_data = {}
-        self.animation_finished = False # Biến kiểm tra animation xong chưa
+        self.animation_finished = False
         
         # Cấu hình dữ liệu quái vật
         if monster_type == "Microwave":
@@ -125,7 +125,6 @@ class Monster(pygame.sprite.Sprite):
                 self.animation_finished = False
             
             self.image = frame_list[int(self.frame_index)]
-            # Giữ vị trí chân (bottom) và tâm ngang (centerx) ổn định khi đổi frame
             old_bottom = self.rect.bottom
             old_center_x = self.rect.centerx
             self.rect = self.image.get_rect()
@@ -155,7 +154,6 @@ class MonsterSpawner:
         self.last_death_time = 0
         self.spawn_cooldown = 2000 
 
-    # TÁCH UPDATE: Chỉ xử lý logic, KHÔNG vẽ
     def update(self, is_moving=True):
         current_time = pygame.time.get_ticks()
         
@@ -174,7 +172,6 @@ class MonsterSpawner:
             if monster.rect.right < 0: 
                 self.monsters.remove(monster)
 
-    # TÁCH DRAW: Chỉ vẽ
     def draw(self, screen):
         for monster in self.monsters:
             monster.draw(screen)

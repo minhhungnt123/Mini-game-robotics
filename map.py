@@ -12,11 +12,9 @@ class Map:
     def draw(self, screen, is_moving=True, offset_y=0):
         if is_moving:
             self.ground_scroll -= self.scroll_speed
-            if abs(self.ground_scroll) > self.width: # Reset khi trôi hết 1 ảnh
+            if abs(self.ground_scroll) > self.width:
                 self.ground_scroll = 0
         
-        # Logic vẽ nối tiếp
-        # Cộng thêm offset_y vào vị trí Y
         y_pos = (screen.get_height() - self.height) + offset_y
         
         current_x = self.ground_scroll

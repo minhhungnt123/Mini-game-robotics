@@ -36,7 +36,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = [x, y]
         self.vel = 0
-        self.animation_finished = False # Cờ báo hiệu animation đã xong chưa
+        self.animation_finished = False
 
     def load_animation(self, img_name, frame_w, frame_h):
         animation_list = []
@@ -58,7 +58,6 @@ class Player(pygame.sprite.Sprite):
         return []
 
     def update(self):
-        # Xác định animation nào cần Loop (lặp lại), animation nào chỉ chạy 1 lần
         loop = True
         if self.state in ["ATTACK", "HIT", "DEATH"]:
             loop = False
@@ -79,7 +78,7 @@ class Player(pygame.sprite.Sprite):
                 self.animation_finished = False
             else:
                 self.frame_index = len(frame_list) - 1
-                self.animation_finished = True # Đánh dấu đã chạy xong
+                self.animation_finished = True
         else:
             self.animation_finished = False
 

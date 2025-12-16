@@ -27,11 +27,11 @@ class Menu:
             print(f"Menu Load Error: {e}")
             # Tạo hình tạm nếu lỗi load ảnh
             self.bg_image = pygame.Surface(self.menu_text_size)
-            self.bg_image.fill((255, 255, 0)) # Màu vàng
+            self.bg_image.fill((255, 255, 0))
             self.btn_start_img = pygame.Surface(self.btn_size)
-            self.btn_start_img.fill((0, 255, 0)) # Màu xanh lá
+            self.btn_start_img.fill((0, 255, 0))
             self.btn_setting_img = pygame.Surface(self.btn_size)
-            self.btn_setting_img.fill((0, 0, 255)) # Màu xanh dương
+            self.btn_setting_img.fill((0, 0, 255))
 
         # Canh giữa các thành phần
         # Tiêu đề nằm trên
@@ -44,7 +44,7 @@ class Menu:
         self.btn_setting_rect = self.btn_setting_img.get_rect(center=(screen_width//2, screen_height//2 + 200))
 
         # Animation states
-        self.state = "INTRO" # INTRO, ACTIVE, OUTRO
+        self.state = "INTRO"
         self.alpha = 0
         self.fade_speed = 5
 
@@ -90,19 +90,15 @@ class Menu:
                     return "SETTING"
         return None
 
-# ========================================================
 # CLASS QUẢN LÝ GAME OVER (MENU SAU TRÒ CHƠI)
-# ========================================================
 class GameOverMenu:
     def __init__(self, screen_width, screen_height):
         self.width = screen_width
         self.height = screen_height
         
-        # ====================================================
         # [CẤU HÌNH KÍCH THƯỚC CHO GAME OVER TẠI ĐÂY]
-        # ====================================================
-        self.text_size = (750, 400) # (Rộng, Cao) chữ Game Over
-        self.btn_size = (350, 150)   # (Rộng, Cao) nút Restart
+        self.text_size = (750, 400)
+        self.btn_size = (350, 150) 
         
         # Load Assets
         try:
@@ -135,7 +131,7 @@ class GameOverMenu:
         if self.alpha < 255:
             self.alpha += self.fade_speed
             if self.alpha > 255: self.alpha = 255
-        return self.alpha # Trả về alpha để main.py dùng sync với background
+        return self.alpha
 
     def draw(self, screen):
         """Vẽ Text và Button"""
@@ -148,9 +144,8 @@ class GameOverMenu:
 
     def handle_input(self, event):
         """Xử lý click nút Restart"""
-        # Chỉ nhận click khi đã hiện rõ (alpha >= 255)
         if self.alpha >= 255 and event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1: # Chuột trái
+            if event.button == 1:
                 if self.rect_restart.collidepoint(event.pos):
                     return "RESTART"
         return None

@@ -188,7 +188,6 @@ while running:
                 player.update()
             else:
                 player.rect.x = DEFAULT_PLAYER_X
-                # [QUAN TRỌNG] Không set IDLE ở đây nữa, để nó tự chuyển trong PLAYING
                 player_done = True
             
             # Heart bay xuống
@@ -201,7 +200,6 @@ while running:
 
             if player_done and heart_done:
                 game_state = "PLAYING"
-                # Spawn quái ngay lập tức
                 monster_spawner.last_spawn_time = pygame.time.get_ticks() - 5000 
 
         game_map.draw(screen, is_moving=True, offset_y=ground_offset_current)
@@ -225,14 +223,13 @@ while running:
                     combat_state = "DEFEAT_PHASE_1"
                     if target_monster: target_monster.set_action("ATTACK")
                     player.set_action("IDLE")
-            
-            # Kiểm tra va chạm / Quiz
+                    
+            # Kiểm tra khoảng cách đến quái để quyết định dừng hay chạy
             if len(monster_spawner.monsters) > 0 and combat_state == "NONE":
                  target_monster = monster_spawner.monsters[0]
                  distance = target_monster.rect.centerx - player.rect.centerx
                  if 0 < distance < 700:
                      game_is_moving = False
-                     # [QUAN TRỌNG] Gặp quái mới đứng lại (IDLE)
                      player.set_action("IDLE")
                      
                      if not quiz_ui.is_active:
@@ -248,17 +245,15 @@ while running:
                          else:
                              quiz_ui.start_quiz({"question":"1+1=?","options":["1","2"],"correct_index":1})
                  else:
-                     # Chưa gặp quái -> Đi tiếp
-                     game_is_moving = True
+                    # Chưa gặp quái -> Đi tiếp
+                    game_is_moving = True
             else:
-                 # Không có quái -> Đi tiếp
-                 game_is_moving = True
+                # Không có quái -> Đi tiếp
+                game_is_moving = True
 
-            # [QUAN TRỌNG] Logic Animation: Nếu đất trôi -> Player chạy
             if combat_state == "NONE":
                 if game_is_moving:
                     player.set_action("WALK")
-                # Lưu ý: Không set IDLE ở đây vì logic dừng đã xử lý ở trên (khi distance < 700)
 
             # State Machine Combat
             if combat_state != "NONE":
@@ -310,15 +305,12 @@ while running:
 
             player.update()
             
-            # [FIX VẤN ĐỀ 1 - TĂNG TỐC QUÁI]
             if monster_spawner.monsters:
                 for m in monster_spawner.monsters:
                     dist_to_player = m.rect.x - player.rect.x
-                    # Nếu quái ở rất xa (>900px) -> Chạy cực nhanh (15px/frame)
-                    if dist_to_player > 900:
+                    if dist_to_player > 500:
                          m.rect.x -= 15 
-                    # Nếu quái ở hơi xa (>750px) -> Chạy nhanh vừa (5px/frame)
-                    elif dist_to_player > 750:
+                    elif dist_to_player > 350:
                          m.rect.x -= 5
                          
             monster_spawner.update(is_moving=game_is_moving)
@@ -340,10 +332,8 @@ while running:
             bg_normal.draw(screen)
             bg_gameover.draw(screen, alpha=game_over_menu.alpha)
             
-            # Vẽ Map trôi xuống
             game_map.draw(screen, is_moving=False, offset_y=ground_offset_current)
             
-            # [FIX VẤN ĐỀ 2] Vẽ Player trôi xuống theo đất
             if game_over_menu.alpha < 250:
                  screen.blit(player.image, (player.rect.x, player.rect.y + ground_offset_current))
 
