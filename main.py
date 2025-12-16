@@ -326,7 +326,7 @@ while running:
                     if target_monster: target_monster.set_action("IDLE") # Quái đánh xong đứng nghỉ
                     player.set_action("HIT")
                     
-                    # Trừ máu ngay lúc bị đánh trúng này mới hợp lý
+                    # Trừ máu ngay lúc bị đánh trúng
                     player_lives -= 1
                     if player_lives <= 0: player_lives = 0
 
