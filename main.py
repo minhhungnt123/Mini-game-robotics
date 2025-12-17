@@ -42,6 +42,7 @@ def get_question_by_difficulty(game_data, difficulty="easy"):
 
 # --- KHỞI TẠO GAME ---
 pygame.init()
+pygame.mixer.init()
 WIDTH, HEIGHT = 1280, 720
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Robotics Mini Game')
@@ -82,6 +83,15 @@ except:
 
 ground_offset_target = 0
 ground_offset_current = 400 
+
+# --- XỬ LÝ NHẠC NỀN (BGM) ---
+try:
+    bgm_path = os.path.join(BASE_DIR, "Sounds", "bgm.mp3") 
+    pygame.mixer.music.load(bgm_path)
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(-1)
+except Exception as e:
+    print(f"Không tìm thấy nhạc nền: {e}")
 
 # --- QUẢN LÝ TRẠNG THÁI ---
 cinematic_phase = 0
