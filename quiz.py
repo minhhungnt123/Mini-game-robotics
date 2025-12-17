@@ -1,7 +1,11 @@
 import pygame
 import sys
+import os
 
 WHITE = (255, 255, 255)
+
+# ===== BASE DIR (QUAN TRỌNG) =====
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 class QuizManager:
     def __init__(self, screen_width, screen_height):
@@ -10,44 +14,48 @@ class QuizManager:
 
         # ===== FONT =====
         try:
-            self.font_q = pygame.font.Font("Font/Mitr/Mitr-Medium.ttf", 26)
-            self.font_a = pygame.font.Font("Font/Mitr/Mitr-Medium.ttf", 18)
+            self.font_q = pygame.font.Font(
+                os.path.join(BASE_DIR, "Font", "Mitr", "Mitr-Medium.ttf"), 26
+            )
+            self.font_a = pygame.font.Font(
+                os.path.join(BASE_DIR, "Font", "Mitr", "Mitr-Medium.ttf"), 18
+            )
         except:
             self.font_q = pygame.font.SysFont("Arial", 26, bold=True)
             self.font_a = pygame.font.SysFont("Arial", 18, bold=True)
 
         # ===== BOARD =====
         try:
-            raw = pygame.image.load("Images/Board/board.png").convert_alpha()
-        except FileNotFoundError:
-            # Fallback nếu không tìm thấy ảnh
+            raw = pygame.image.load(
+                os.path.join(BASE_DIR, "Images", "Board", "board.png")
+            ).convert_alpha()
+        except:
             raw = pygame.Surface((600, 400))
             raw.fill((50, 50, 50))
-            
+
         bw = int(self.sw * 0.8)
         bh = int(bw * raw.get_height() / raw.get_width())
         self.board_img = pygame.transform.smoothscale(raw, (bw, bh))
-        self.board_rect = self.board_img.get_rect(center=(self.sw // 2, self.sh // 2))
+        self.board_rect = self.board_img.get_rect(
+            center=(self.sw // 2, self.sh // 2)
+        )
 
         # ===== BUTTON =====
         self.buttons = []
         labels = ["A", "B", "C", "D"]
 
-        # Kích thước nút dựa trên nút A_base (làm mẫu)
         try:
-            temp = pygame.image.load("Images/Board/A_base.png").convert_alpha()
+            temp = pygame.image.load(
+                os.path.join(BASE_DIR, "Images", "Board", "A_base.png")
+            ).convert_alpha()
             btn_w = int(self.board_rect.width * 0.3)
             btn_h = int(btn_w * temp.get_height() / temp.get_width())
         except:
-            btn_w = 200
-            btn_h = 50
+            btn_w, btn_h = 200, 50
 
-        bx = self.board_rect.left
-        by = self.board_rect.top
-        bw = self.board_rect.width
-        bh = self.board_rect.height
+        bx, by = self.board_rect.topleft
+        bw, bh = self.board_rect.size
 
-        # Vị trí tương đối của 4 nút trên bảng
         positions = [
             (bx + int(bw * 0.18), by + int(bh * 0.48)),
             (bx + int(bw * 0.52), by + int(bh * 0.48)),
@@ -57,14 +65,16 @@ class QuizManager:
 
         for i, label in enumerate(labels):
             imgs = {}
-            # Load các trạng thái ảnh của nút
             for state in ["base", "hover", "pressed", "correct", "wrong"]:
-                path = f"Images/Board/{label}_{state}.png"
+                path = os.path.join(
+                    BASE_DIR, "Images", "Board", f"{label}_{state}.png"
+                )
                 try:
                     img = pygame.image.load(path).convert_alpha()
-                    imgs[state] = pygame.transform.smoothscale(img, (btn_w, btn_h))
+                    imgs[state] = pygame.transform.smoothscale(
+                        img, (btn_w, btn_h)
+                    )
                 except:
-                    # Fallback nếu thiếu ảnh
                     surf = pygame.Surface((btn_w, btn_h))
                     if state == "base": surf.fill((100, 100, 100))
                     elif state == "hover": surf.fill((150, 150, 150))
@@ -74,7 +84,6 @@ class QuizManager:
                     imgs[state] = surf
 
             rect = imgs["base"].get_rect(topleft=positions[i])
-
             self.buttons.append({
                 "imgs": imgs,
                 "rect": rect,
@@ -83,30 +92,34 @@ class QuizManager:
                 "state": "base"
             })
 
-        # ===== SOUNDS (THÊM MỚI) =====
+        # ===== SOUND (MP3 – ĐÃ FIX) =====
         self.snd_correct = None
         self.snd_wrong = None
-        
-        # Load âm thanh
-        try:
-            # Hãy đảm bảo đường dẫn này đúng với file của bạn
-            self.snd_correct = pygame.mixer.Sound("Sounds/correct.wav")
-            self.snd_correct.set_volume(0.7)
-            
-            self.snd_wrong = pygame.mixer.Sound("Sounds/wrong.wav")
-            self.snd_wrong.set_volume(0.7)
-        except Exception as e:
-            print(f"Warning: Không thể load âm thanh quiz: {e}")
 
+        try:
+            self.snd_correct = pygame.mixer.Sound(
+                os.path.join(BASE_DIR, "Sounds", "correct.mp3")
+            )
+            self.snd_wrong = pygame.mixer.Sound(
+                os.path.join(BASE_DIR, "Sounds", "wrong.mp3")
+            )
+
+            self.snd_correct.set_volume(0.7)
+            self.snd_wrong.set_volume(0.7)
+
+            # Channel riêng để không bị BGM đè
+            self.correct_ch = pygame.mixer.Channel(3)
+            self.wrong_ch = pygame.mixer.Channel(4)
+
+        except Exception as e:
+            print("⚠ Không load được sound quiz:", e)
+
+        # ===== STATE =====
         self.is_active = False
         self.question = None
-
-        # result timing
         self.result_time = None
         self.result_delay = 500
         self.result_value = None
-
-        # fade
         self.fade_alpha = 0
         self.fading = False
 
@@ -114,7 +127,6 @@ class QuizManager:
     def start_quiz(self, data):
         self.question = data
         self.is_active = True
-
         self.result_time = None
         self.result_value = None
         self.fade_alpha = 0
@@ -158,6 +170,7 @@ class QuizManager:
 
         mouse = pygame.mouse.get_pos()
         hovered = None
+
         for b in self.buttons:
             b["hover"] = False
             if b["rect"].collidepoint(mouse) and hovered is None:
@@ -175,12 +188,11 @@ class QuizManager:
                 if b["pressed"] and b["hover"] and self.result_time is None:
                     correct = i == self.question["correct_index"]
 
-                    # ===== PHÁT ÂM THANH =====
-                    if correct:
-                        if self.snd_correct: self.snd_correct.play()
-                    else:
-                        if self.snd_wrong: self.snd_wrong.play()
-                    # =========================
+                    # ===== PLAY SOUND =====
+                    if correct and self.snd_correct:
+                        self.correct_ch.play(self.snd_correct)
+                    elif not correct and self.snd_wrong:
+                        self.wrong_ch.play(self.snd_wrong)
 
                     b["state"] = "correct" if correct else "wrong"
                     if not correct:
@@ -229,7 +241,9 @@ class QuizManager:
 
         # question
         max_w = int(self.board_rect.width * 0.75)
-        q_lines = self._wrap_2_lines(self.question["question"], self.font_q, max_w)
+        q_lines = self._wrap_2_lines(
+            self.question["question"], self.font_q, max_w
+        )
         y = self.board_rect.top + int(self.board_rect.height * 0.38)
 
         for l in q_lines:
@@ -253,12 +267,16 @@ class QuizManager:
             if i < len(self.question["options"]):
                 padding = int(b["rect"].width * 0.42)
                 avail = b["rect"].width - padding - 20
-                lines = self._wrap_2_lines(self.question["options"][i], self.font_a, avail)
+                lines = self._wrap_2_lines(
+                    self.question["options"][i], self.font_a, avail
+                )
 
                 ty = b["rect"].centery - (len(lines) * 30) // 2
                 for line in lines:
                     surf = self.font_a.render(line, True, WHITE)
-                    screen.blit(surf, (b["rect"].left + padding, ty))
+                    screen.blit(
+                        surf, (b["rect"].left + padding, ty)
+                    )
                     ty += 18
 
         if self.fading:

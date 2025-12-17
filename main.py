@@ -41,6 +41,7 @@ def get_question_by_difficulty(game_data, difficulty="easy"):
     return None
 
 # --- KHỞI TẠO GAME ---
+pygame.mixer.pre_init(44100, -16, 2, 512)
 pygame.init()
 pygame.mixer.init()
 WIDTH, HEIGHT = 1280, 720
@@ -238,7 +239,7 @@ while running:
             if len(monster_spawner.monsters) > 0 and combat_state == "NONE":
                  target_monster = monster_spawner.monsters[0]
                  distance = target_monster.rect.centerx - player.rect.centerx
-                 if 0 < distance < 700:
+                 if 0 < distance < 800:
                      game_is_moving = False
                      player.set_action("IDLE")
                      
@@ -315,13 +316,11 @@ while running:
 
             player.update()
             
-            if monster_spawner.monsters:
-                for m in monster_spawner.monsters:
-                    dist_to_player = m.rect.x - player.rect.x
-                    if dist_to_player > 500:
-                         m.rect.x -= 15 
-                    elif dist_to_player > 350:
-                         m.rect.x -= 5
+            # if monster_spawner.monsters:
+            #     for m in monster_spawner.monsters:
+            #         dist_to_player = m.rect.x - player.rect.x
+            #         if dist_to_player > 1000:
+            #             m.rect.x -= 15
                          
             monster_spawner.update(is_moving=game_is_moving)
         
@@ -345,7 +344,7 @@ while running:
             game_map.draw(screen, is_moving=False, offset_y=ground_offset_current)
             
             if game_over_menu.alpha < 250:
-                 screen.blit(player.image, (player.rect.x, player.rect.y + ground_offset_current))
+                screen.blit(player.image, (player.rect.x, player.rect.y + ground_offset_current))
 
             game_over_menu.draw(screen)
 
