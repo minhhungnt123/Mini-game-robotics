@@ -41,7 +41,7 @@ def get_question_by_difficulty(game_data, difficulty="easy"):
     return None
 
 # --- KHỞI TẠO GAME ---
-pygame.mixer.pre_init(44100, -16, 2, 512)
+pygame.mixer.pre_init(44100, -16, 2, 2048)
 pygame.init()
 pygame.mixer.init()
 WIDTH, HEIGHT = 1280, 720
@@ -87,7 +87,7 @@ ground_offset_current = 400
 
 # --- XỬ LÝ NHẠC NỀN (BGM) ---
 try:
-    bgm_path = os.path.join(BASE_DIR, "Sounds", "bgm.mp3") 
+    bgm_path = os.path.join(BASE_DIR, "Sound", "bgm.mp3") 
     pygame.mixer.music.load(bgm_path)
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)

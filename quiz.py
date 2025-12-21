@@ -98,10 +98,10 @@ class QuizManager:
 
         try:
             self.snd_correct = pygame.mixer.Sound(
-                os.path.join(BASE_DIR, "Sounds", "correct.mp3")
+                os.path.join(BASE_DIR, "Sound", "correct-choice.mp3")
             )
             self.snd_wrong = pygame.mixer.Sound(
-                os.path.join(BASE_DIR, "Sounds", "wrong.mp3")
+                os.path.join(BASE_DIR, "Sound", "wrong-choice.mp3")
             )
 
             self.snd_correct.set_volume(0.7)
